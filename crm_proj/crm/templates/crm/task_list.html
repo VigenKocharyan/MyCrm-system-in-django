@@ -1,0 +1,27 @@
+<h2>Add Task</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save Task</button>
+</form>
+<a href="{% url 'task_list' %}">Back to Task List</a>
+
+
+<a href="{% url 'add_task' %}">Add Task</a>
+
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for client in clients %}
+            <tr>
+                <td>{{ client.name }}</td>
+                <td>{{ client.email }}</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

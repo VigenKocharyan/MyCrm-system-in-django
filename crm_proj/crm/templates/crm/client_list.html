@@ -1,0 +1,159 @@
+{% extends 'crm/base.html' %}
+{% load widget_tweaks %}
+{% block title %}Clients – MyCRM{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h2>Clients</h2>
+  <a href="{% url 'add_client' %}" class="btn btn-success">+ New Client</a>
+</div>
+
+<form method="get" class="row g-3 mb-4" action="{% url 'client_list' %}">
+  <div class="col-md-5">
+    <input type="text" name="q" value="{{ query }}" class="form-control" placeholder="Search clients…">
+  </div>
+  <div class="col-md-4">
+    <select name="status" class="form-select">
+      <option value="">All statuses</option>
+      <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+      <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inactive</option>
+    </select>
+  </div>
+  <div class="col-md-3">
+    <button type="submit" class="btn btn-primary w-100">Filter</button>
+  </div>
+</form>
+
+<div class="table-responsive shadow-sm bg-white rounded">
+  <table class="table table-hover align-middle mb-0">
+    <thead class="table-primary">
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th class="text-end">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for client in page_obj %}
+        <tr>
+          <td>
+            <a href="{% url 'client_detail' client.id %}" class="link-primary">
+              {{ client.name }}
+            </a>
+          </td>
+          <td>{{ client.email }}</td>
+          <td>
+            <span class="badge {% if client.status == 'active' %}bg-success{% else %}bg-secondary{% endif %}">
+              {{ client.get_status_display }}
+            </span>
+          </td>
+          <td class="text-end">
+            <a href="{% url 'client_edit' client.id %}" class="btn btn-sm btn-outline-warning me-2">Edit</a>
+
+            <form action="{% url 'client_delete' client.id %}" method="post" class="d-inline">
+
+              {% csrf_token %}
+              <button type="submit"
+                      class="btn btn-sm btn-outline-danger"
+                      onclick="return confirm('Delete {{ client.name }}?');">
+                Delete
+              </button>
+            </form>
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="4" class="text-center py-4">No clients found.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+<form method="get">
+  <input type="text" name="q" placeholder="Search clients..." value="{{ query }}">
+  
+  <select name="status">
+      <option value="">All statuses</option>
+      <option value="Active" {% if status == 'Active' %}selected{% endif %}>Active</option>
+      <option value="Inactive" {% if status == 'Inactive' %}selected{% endif %}>Inactive</option>
+  </select>
+
+  <select name="sort_by">
+      <option value="name" {% if sort_by == 'name' %}selected{% endif %}>Sort by Name</option>
+      <option value="email" {% if sort_by == 'email' %}selected{% endif %}>Sort by Email</option>
+  </select>
+
+  <select name="order">
+      <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+      <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+  </select>
+
+  <button type="submit">Apply Filters</button>
+</form>
+
+<table>
+  <tr>
+      <th>Name</th>
+      <th>Email</th>
+      <th>Status</th>
+      <th>Actions</th>
+  </tr>
+  {% for client in page_obj %}
+  <tr>
+      <td>{{ client.name }}</td>
+      <td>{{ client.email }}</td>
+      <td>{{ client.status }}</td>
+      <td>
+          <a href="{% url 'client_detail' client.pk %}">View</a> |
+          <a href="{% url 'client_edit' client.pk %}">Edit</a> |
+          <a href="{% url 'client_delete' client.pk %}">Delete</a>
+      </td>
+  </tr>
+  {% endfor %}
+</table>
+
+<div class="pagination">
+  <span class="step-links">
+      {% if page_obj.has_previous %}
+          <a href="?page=1&q={{ query }}&status={{ status }}&sort_by={{ sort_by }}&order={{ order }}">First</a>
+          <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&status={{ status }}&sort_by={{ sort_by }}&order={{ order }}">Previous</a>
+      {% endif %}
+
+      <span class="current">
+          Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+      </span>
+
+      {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&status={{ status }}&sort_by={{ sort_by }}&order={{ order }}">Next</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}&q={{ query }}&status={{ status }}&sort_by={{ sort_by }}&order={{ order }}">Last</a>
+      {% endif %}
+  </span>
+</div>
+
+<nav class="mt-4">
+  <ul class="pagination justify-content-center mb-0">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page=1">&laquo; First</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+      </li>
+    {% endif %}
+
+    <li class="page-item active">
+      <span class="page-link">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+    </li>
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+      </li>
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
+{% endblock %}
